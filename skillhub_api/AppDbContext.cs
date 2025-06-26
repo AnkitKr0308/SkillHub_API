@@ -12,5 +12,6 @@ namespace skillhub_api
         public DbSet<Users> Users { get; set; }
         public DbSet<Creds> Creds { get; set; } 
         public DbSet<Roles> Roles { get; set; }
+        public DbSet<Courses> Courses { get; set; }
     }
 }
