@@ -10,7 +10,7 @@ namespace skillhub_api.Models
         public int CourseId { get; set; }
         [Required]
         public int UserId { get; set; }
-        public string Comments { get; set; }
-        public string Status { get; set; }
+        public string? Comments { get; set; }
+        public string? Status { get; set; }
     }
 }

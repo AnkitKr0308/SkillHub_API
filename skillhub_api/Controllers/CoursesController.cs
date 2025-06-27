@@ -96,5 +96,7 @@ namespace skillhub_api.Controllers
                 return NotFound("No Courses Found");
             }
         }
+
+       
     }
 }
