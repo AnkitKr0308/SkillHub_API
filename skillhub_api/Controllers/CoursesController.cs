@@ -40,6 +40,35 @@ namespace skillhub_api.Controllers
             }
         }
 
+        [HttpPut("EditCourse/{courseId}")]
+        public async Task<ActionResult> EditCourse(int courseId, [FromBody] Courses course)
+        {
+            var existingData = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseId);
+            if (existingData == null)
+            {
+                return NotFound();
+            }
+           
+            existingData.Title=course.Title;
+            existingData.Description=course.Description;
+            existingData.ArticleLink1 = course.ArticleLink1;
+            existingData.ArticleLink2 = course.ArticleLink2;
+            existingData.ArticleLink3 = course.ArticleLink3;
+            existingData.VideoLink1 = course.VideoLink1;
+            existingData.VideoLink2 = course.VideoLink2;
+            existingData.VideoLink3 = course.VideoLink3;
+
+            var updatedData = await _context.SaveChangesAsync();
+            if (updatedData > 0)
+            {
+                return Ok(existingData);
+            }
+            else
+            {
+                return BadRequest("Failed to update Data");
+            }
+        }
+
         [HttpGet("EnrolledCourses")]
         public async Task<ActionResult> GetEnrolledCourses([FromQuery] int UserId)
         {
@@ -97,6 +126,28 @@ namespace skillhub_api.Controllers
             }
         }
 
-       
+        [HttpPost("ArchiveCourse/{courseid}")]
+        public async Task<ActionResult> ArchiveCourse(int courseid)
+        {
+            var existing = await _context.Courses.FirstOrDefaultAsync(c=>c.CourseId==courseid);
+            if (existing == null)
+            {
+                return NotFound("No such course found");
+            }
+           
+            var id = new MySqlParameter("@CourseIdParam", courseid);
+            var data = await _context.Database.ExecuteSqlRawAsync("CALL sp_ArchiveCourse (@CourseIdParam)", id);
+
+            if (data > 0)
+            {
+                return Ok("Course Archived Successfully");
+            }
+            else
+            {
+                return BadRequest("Failed to Archive Course");
+            }
+
+        }
+
     }
 }
