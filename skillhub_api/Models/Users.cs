@@ -6,9 +6,12 @@ namespace skillhub_api.Models
     {
         [Key]
         public int UserId { get; set; }
+        [Required]
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        [Required]
         public string Email { get; set; }
+        [Required]
         public int RoleId { get; set; }
 
         public string Role => RoleId switch

@@ -20,7 +20,7 @@ namespace skillhub_api.Controllers
         }
 
         [HttpGet("getemails")]
-        public async Task<ActionResult<Users>> GetEmails ()
+        public async Task<ActionResult<Users>> GetEmails()
         {
             var emails = await _context.Users.Select(user => user.Email).ToListAsync();
 
@@ -28,7 +28,7 @@ namespace skillhub_api.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task <ActionResult> CreateUser (UserCredDTO user)
+        public async Task<ActionResult> CreateUser(UserCredDTO user)
         {
 
             var userData = new Users
@@ -50,16 +50,16 @@ namespace skillhub_api.Controllers
             _context.Creds.Add(cred);
 
 
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
             return Ok(userData);
         }
 
         [HttpPost("login")]
-        public async Task <ActionResult> ValidateUserCreds ([FromBody] LoginDTO model)
+        public async Task<ActionResult> ValidateUserCreds([FromBody] LoginDTO model)
         {
             var emailParam = new MySqlParameter("@emailParam", model.email);
 
-           var result = await _context.Users.FromSqlRaw("CALL sp_getUserCreds (@emailParam)", emailParam).ToListAsync();
+            var result = await _context.Users.FromSqlRaw("CALL sp_getUserCreds (@emailParam)", emailParam).ToListAsync();
 
             var user = result.FirstOrDefault();
 
@@ -79,7 +79,57 @@ namespace skillhub_api.Controllers
 
             return Ok(user);
         }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Users>>> GetAllUsers()
+        {
+            var users = await _context.Users.ToListAsync();
+            return Ok(users);
+        }
 
-       
-    }
+        [HttpPut("edituser/{id}")]
+        public async Task<ActionResult> UpdateUser(int id, [FromBody] Users userData)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+            user.FirstName = userData.FirstName;
+            user.LastName = userData.LastName;
+            user.Email = userData.Email;
+            user.RoleId = userData.RoleId;
+
+            var data = await _context.SaveChangesAsync();
+            if (data > 0)
+            {
+                return Ok(user);
+            }
+            else
+            {
+                return BadRequest("No changes were made to the database.");
+            }
+        }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+
+            var user = new MySqlParameter("@userIDParam", id);
+
+              var result =  await _context.Database.ExecuteSqlRawAsync("CALL sp_deleteUser (@userIDParam)", user);
+
+            if (result > 0)
+            {
+                return Ok(new { success = true, message = "User deleted successfully", data = new { id } });
+            }
+            else
+            {
+                return NotFound(new { success = false, message = "User not found or not deleted" });
+            }
+        }
+
+    
+
+
+}
 }
